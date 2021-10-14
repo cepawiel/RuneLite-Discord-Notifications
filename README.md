@@ -1,4 +1,4 @@
-# Discord Level Notifications
+# Discord Notifications
 This is a plugin for RuneLite which sends a message to your discord channel when you level up, complete a quest or when you die. The message includes what skill you levelled or quest you completed and optionally a screenshot as proof. 
 
 In order to use this plugin you will need to create a webhook on your discord server. Below are instructions for how to do so:
