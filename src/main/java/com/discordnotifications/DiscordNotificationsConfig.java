@@ -122,6 +122,35 @@ public interface DiscordNotificationsConfig extends Config {
 	}
 	// End death config section
 
+	// Clue config section
+	@ConfigSection(
+			name = "Clue Scrolls",
+			description = "The config for clue scroll notifications",
+			position = 3,
+			closedByDefault = true
+	)
+	String clueConfig = "clueConfig";
+
+	@ConfigItem(
+			keyName = "includeClues",
+			name = "Send Clue Notifications",
+			description = "Send messages when you complete a clue scroll.",
+			section = clueConfig
+	)
+	default boolean sendClue() { return false; }
+
+	@ConfigItem(
+			keyName = "sendClueScreenshot",
+			name = "Include Clue screenshots",
+			description = "Include a screenshot with the discord notification when you complete a clue.",
+			section = clueConfig,
+			position = 100
+	)
+	default boolean sendClueScreenshot() {
+		return false;
+	}
+	// End clue config section
+
 	@ConfigItem(
 			keyName = "webhook",
 			name = "Webhook URL",
