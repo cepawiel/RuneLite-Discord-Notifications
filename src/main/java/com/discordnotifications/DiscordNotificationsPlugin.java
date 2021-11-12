@@ -6,6 +6,7 @@ import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.*;
+import net.runelite.api.widgets.WidgetID;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -28,15 +29,14 @@ import java.util.regex.Pattern;
 import static net.runelite.http.api.RuneLiteAPI.GSON;
 
 @Slf4j
-@PluginDescriptor(
-	name = "Discord Notifications"
-)
+@PluginDescriptor(name = "Discord Notifications")
 public class DiscordNotificationsPlugin extends Plugin
 {
 	private Hashtable<String, Integer> currentLevels;
 	private ArrayList<String> leveledSkills;
 	private boolean shouldSendLevelMessage = false;
 	private boolean shouldSendQuestMessage = false;
+	private boolean shouldSendClueMessage = false;
 	private int ticksWaited = 0;
 
 	private static final Pattern QUEST_PATTERN_1 = Pattern.compile(".+?ve\\.*? (?<verb>been|rebuilt|.+?ed)? ?(?:the )?'?(?<quest>.+?)'?(?: [Qq]uest)?[!.]?$");
@@ -93,6 +93,14 @@ public class DiscordNotificationsPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
+
+		boolean didCompleteClue = client.getWidget(WidgetInfo.CLUE_SCROLL_REWARD_ITEM_CONTAINER) != null;
+
+		if (shouldSendClueMessage && didCompleteClue && config.sendClue()) {
+			shouldSendClueMessage = false;
+			sendClueMessage();
+		}
+
 		if (
 				shouldSendQuestMessage
 						&& config.sendQuestComplete()
@@ -200,6 +208,16 @@ public class DiscordNotificationsPlugin extends Plugin
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(deathMessageString);
 		sendWebhook(discordWebhookBody, config.sendDeathScreenshot());
+	}
+
+	private void sendClueMessage()
+	{
+		String localName = client.getLocalPlayer().getName();
+
+		String clueMessage = String.format("%s has just completed a clue scroll", localName);
+		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
+		discordWebhookBody.setContent(clueMessage);
+		sendWebhook(discordWebhookBody, config.sendClueScreenshot());
 	}
 
 	private void sendLevelMessage()
@@ -317,6 +335,7 @@ public class DiscordNotificationsPlugin extends Plugin
 		leveledSkills.clear();
 		shouldSendLevelMessage = false;
 		shouldSendQuestMessage = false;
+		shouldSendClueMessage = false;
 		ticksWaited = 0;
 	}
 
@@ -364,6 +383,10 @@ public class DiscordNotificationsPlugin extends Plugin
 
 		if (groupId == QUEST_COMPLETED_GROUP_ID) {
 			shouldSendQuestMessage = true;
+		}
+
+		if (groupId == WidgetID.CLUE_SCROLL_REWARD_GROUP_ID) {
+			shouldSendClueMessage = true;
 		}
 	}
 }
