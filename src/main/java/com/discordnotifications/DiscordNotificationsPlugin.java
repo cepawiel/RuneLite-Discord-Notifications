@@ -181,11 +181,16 @@ public class DiscordNotificationsPlugin extends Plugin
 				&& levelMeetsIntervalRequirement(level);
 	}
 
-	private boolean levelMeetsIntervalRequirement(int level)
-	{
-		return config.levelInterval() <= 1
+	private boolean levelMeetsIntervalRequirement(int level) {
+		int levelInterval = config.levelInterval();
+
+		if (config.linearLevelMax() > 0) {
+			levelInterval = (int) Math.max(Math.ceil(-.1*level + config.linearLevelMax()), 1);
+		}
+
+		return levelInterval <= 1
 				|| level == 99
-				|| level % config.levelInterval() == 0;
+				|| level % levelInterval == 0;
 	}
 
 	private void sendQuestMessage(String questName)

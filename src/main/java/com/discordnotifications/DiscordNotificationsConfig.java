@@ -51,6 +51,17 @@ public interface DiscordNotificationsConfig extends Config {
 	}
 
 	@ConfigItem(
+			keyName = "linearLevelModifier",
+			name = "Linear Level Modifier",
+			description = "Send every `max(-.1x + linearLevelMax, 1)` levels. Will override `Send every X levels` if set to above zero.",
+			section = levellingConfig,
+			position = 4
+	)
+	default double linearLevelMax() {
+		return 0;
+	}
+
+	@ConfigItem(
 			keyName = "sendLevellingScreenshot",
 			name = "Include levelling screenshots",
 			description = "Include a screenshot when leveling up.",
