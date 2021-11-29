@@ -169,10 +169,10 @@ public class DiscordNotificationsPlugin extends Plugin
 		}
 
 		String chatMessage = event.getMessage();
-    if (config.setPets() && PET_MESSAGES.stream().anyMatch(chatMessage::contains))
-    {
-      sendPetMessage();
-    }
+		if (config.setPets() && PET_MESSAGES.stream().anyMatch(chatMessage::contains))
+		{
+			sendPetMessage();
+		}
 	}
 
 	@Subscribe
