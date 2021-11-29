@@ -168,4 +168,32 @@ public interface DiscordNotificationsConfig extends Config {
 			description = "The Discord Webhook URL to send messages to."
 	)
 	String webhook();
+
+	// Pet config section
+	@ConfigSection(
+			name = "Pets",
+			description = "The config for pet notifications",
+			position = 4,
+			closedByDefault = true
+	)
+	String petConfig = "petConfig";
+
+	@ConfigItem(
+			keyName = "includePets",
+			name = "Send Pet Notifications",
+			description = "Send messages when you receive a pet.",
+			section = petConfig
+	)
+	default boolean setPets() { return false; }
+
+	@ConfigItem(
+			keyName = "sendPetScreenshot",
+			name = "Include Pet screenshots",
+			description = "Include a screenshot with the discord notification when you receive a pet.",
+			section = petConfig,
+			position = 100
+	)
+	default boolean sendPetScreenshot() {
+		return false;
+	}
 }
