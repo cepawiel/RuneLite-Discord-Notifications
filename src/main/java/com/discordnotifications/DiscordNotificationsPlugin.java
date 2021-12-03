@@ -43,6 +43,9 @@ public class DiscordNotificationsPlugin extends Plugin
 	private static final Pattern QUEST_PATTERN_2 = Pattern.compile("'?(?<quest>.+?)'?(?: [Qq]uest)? (?<verb>[a-z]\\w+?ed)?(?: f.*?)?[!.]?$");
 	private static final ImmutableList<String> RFD_TAGS = ImmutableList.of("Another Cook", "freed", "defeated", "saved");
 	private static final ImmutableList<String> WORD_QUEST_IN_NAME_TAGS = ImmutableList.of("Another Cook", "Doric", "Heroes", "Legends", "Observatory", "Olaf", "Waterfall");
+	private static final ImmutableList<String> PET_MESSAGES = ImmutableList.of("You have a funny feeling like you're being followed",
+			"You feel something weird sneaking into your backpack",
+			"You have a funny feeling like you would have been followed");
 
 	@Inject
 	private Client client;
@@ -158,6 +161,21 @@ public class DiscordNotificationsPlugin extends Plugin
 	}
 
 	@Subscribe
+	public void onChatMessage(ChatMessage event)
+	{
+		if (event.getType() != ChatMessageType.GAMEMESSAGE)
+		{
+			return;
+		}
+
+		String chatMessage = event.getMessage();
+		if (config.setPets() && PET_MESSAGES.stream().anyMatch(chatMessage::contains))
+		{
+			sendPetMessage();
+		}
+	}
+
+	@Subscribe
 	public void onActorDeath(ActorDeath actorDeath)
 	{
 		if (config.sendDeath() == false) {
@@ -255,6 +273,17 @@ public class DiscordNotificationsPlugin extends Plugin
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(levelUpString);
 		sendWebhook(discordWebhookBody, config.sendLevellingScreenshot());
+	}
+
+	private void sendPetMessage()
+	{
+		String localName = client.getLocalPlayer().getName();
+
+		String petMessageString = localName + " has just received a pet!";
+
+		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
+		discordWebhookBody.setContent(petMessageString);
+		sendWebhook(discordWebhookBody, config.sendPetScreenshot());
 	}
 
 	private void sendWebhook(DiscordWebhookBody discordWebhookBody, boolean sendScreenshot)
