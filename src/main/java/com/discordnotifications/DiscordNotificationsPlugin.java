@@ -252,7 +252,7 @@ public class DiscordNotificationsPlugin extends Plugin
 
 	private void sendLevelMessage()
 	{
-		String levelUpString = client.getLocalPlayer().getName();
+		String levelUpString = client.getLocalPlayer().getName() + " leveled ";
 
 		String[] skills = new String[leveledSkills.size()];
 		skills = leveledSkills.toArray(skills);
@@ -266,7 +266,7 @@ public class DiscordNotificationsPlugin extends Plugin
 			{
 				if (i == skills.length - 1)
 				{
-					levelUpString += " and ";
+					levelUpString += ", and ";
 				}
 				else
 				{
@@ -274,7 +274,7 @@ public class DiscordNotificationsPlugin extends Plugin
 				}
 			}
 
-			levelUpString += " leveled " + skill + " to " + currentLevels.get(skill);
+			levelUpString += skill + " to " + currentLevels.get(skill);
 		}
 
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
