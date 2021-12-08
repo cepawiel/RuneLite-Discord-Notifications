@@ -134,28 +134,35 @@ public class DiscordNotificationsPlugin extends Plugin
 	@Subscribe
 	public void onStatChanged(net.runelite.api.events.StatChanged statChanged)
 	{
-		if (!config.sendLevelling()) {
+		if (!config.sendLevelling())
+		{
 			return;
 		}
 
 		String skillName = statChanged.getSkill().getName();
-		int level = statChanged.getLevel();
+		int newLevel = statChanged.getLevel();
 
 		// .contains wasn't behaving so I went with == null
-		if (currentLevels.get(skillName) == null || currentLevels.get(skillName) == 0)
+		Integer previousLevel = currentLevels.get(skillName);
+		if (previousLevel == null || previousLevel == 0)
 		{
-			currentLevels.put(skillName, level);
+			currentLevels.put(skillName, newLevel);
 			return;
 		}
 
-		if (currentLevels.get(skillName) != level)
+		if (previousLevel != newLevel)
 		{
-			currentLevels.put(skillName, level);
+			currentLevels.put(skillName, newLevel);
 
-			if (shouldSendForThisLevel(level))
+			// Certain activities can multilevel, check if any of the levels are valid for the message.
+			for (int level = previousLevel + 1; level <= newLevel; level++)
 			{
-				leveledSkills.add(skillName);
-				shouldSendLevelMessage = true;
+				if (shouldSendForThisLevel(level))
+				{
+					leveledSkills.add(skillName);
+					shouldSendLevelMessage = true;
+					break;
+				}
 			}
 		}
 	}
