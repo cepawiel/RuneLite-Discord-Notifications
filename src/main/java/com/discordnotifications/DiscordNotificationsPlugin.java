@@ -222,7 +222,8 @@ public class DiscordNotificationsPlugin extends Plugin
 	{
 		String localName = client.getLocalPlayer().getName();
 
-		String questMessageString = localName + " has just completed: " + questName;
+		String questMessageString = config.questMessage().replaceAll("\\$name", localName)
+														 .replaceAll("\\$quest", questName);
 
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(questMessageString);
@@ -233,7 +234,7 @@ public class DiscordNotificationsPlugin extends Plugin
 	{
 		String localName = client.getLocalPlayer().getName();
 
-		String deathMessageString = localName + " has just died!";
+		String deathMessageString = config.deathMessage().replaceAll("\\$name", localName);
 
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(deathMessageString);
@@ -244,7 +245,8 @@ public class DiscordNotificationsPlugin extends Plugin
 	{
 		String localName = client.getLocalPlayer().getName();
 
-		String clueMessage = String.format("%s has just completed a clue scroll", localName);
+		String clueMessage = config.clueMessage().replaceAll("\\$name", localName);
+
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(clueMessage);
 		sendWebhook(discordWebhookBody, config.sendClueScreenshot());
@@ -252,7 +254,9 @@ public class DiscordNotificationsPlugin extends Plugin
 
 	private void sendLevelMessage()
 	{
-		String levelUpString = client.getLocalPlayer().getName() + " leveled ";
+		String localName = client.getLocalPlayer().getName();
+
+		String levelUpString = config.levelMessage().replaceAll("\\$name", localName);
 
 		String[] skills = new String[leveledSkills.size()];
 		skills = leveledSkills.toArray(skills);
@@ -260,21 +264,15 @@ public class DiscordNotificationsPlugin extends Plugin
 
 		for (int i = 0; i < skills.length; i++)
 		{
-			String skill = skills[i];
-			leveledSkills.remove(skill);
-			if (i > 0)
-			{
-				if (i == skills.length - 1)
-				{
-					levelUpString += ", and ";
-				}
-				else
-				{
-					levelUpString += ", ";
-				}
+			if(i != 0) {
+				levelUpString += config.andLevelMessage();
 			}
 
-			levelUpString += skill + " to " + currentLevels.get(skill);
+			String fixed = levelUpString
+					.replaceAll("\\$skill", skills[i])
+					.replaceAll("\\$level", currentLevels.get(skills[i]).toString());
+
+			levelUpString = fixed;
 		}
 
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
@@ -286,7 +284,7 @@ public class DiscordNotificationsPlugin extends Plugin
 	{
 		String localName = client.getLocalPlayer().getName();
 
-		String petMessageString = localName + " has just received a pet!";
+		String petMessageString = config.petMessage().replaceAll("\\$name", localName);
 
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(petMessageString);

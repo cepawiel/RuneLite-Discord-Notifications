@@ -8,11 +8,29 @@ import net.runelite.client.config.ConfigSection;
 @ConfigGroup("discordnotifications")
 public interface DiscordNotificationsConfig extends Config {
 
+	// Webhook config section
+	@ConfigSection(
+			name = "Webhook Settings",
+			description = "The config for webhook content notifications",
+			position = 0,
+			closedByDefault = true
+	)
+	String webhookConfig = "webhookConfig";
+
+	@ConfigItem(
+			keyName = "webhook",
+			name = "Webhook URL",
+			description = "The Discord Webhook URL to send messages to.",
+			section = webhookConfig,
+			position = 0
+	)
+	String webhook();
+
 	// Levelling config section
 	@ConfigSection(
 			name = "Levelling",
 			description = "The config for levelling notifications",
-			position = 0,
+			position = 1,
 			closedByDefault = true
 	)
 	String levellingConfig = "levellingConfig";
@@ -62,6 +80,24 @@ public interface DiscordNotificationsConfig extends Config {
 	}
 
 	@ConfigItem(
+			keyName = "levelMessage",
+			name = "Level Message",
+			description = "Message to send to Discord on Level",
+			section = levellingConfig,
+			position = 5
+	)
+	default String levelMessage() { return "$name leveled $skill to $level"; }
+
+	@ConfigItem(
+			keyName = "andLevelMessage",
+			name = "And Level Message",
+			description = "Message to send to Discord when Multi Skill Level",
+			section = levellingConfig,
+			position = 6
+	)
+	default String andLevelMessage() { return ", and $skill to $level"; }
+
+	@ConfigItem(
 			keyName = "sendLevellingScreenshot",
 			name = "Include levelling screenshots",
 			description = "Include a screenshot when leveling up.",
@@ -77,7 +113,7 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigSection(
 			name = "Questing",
 			description = "The config for questing notifications",
-			position = 1,
+			position = 2,
 			closedByDefault = true
 	)
 	String questingConfig = "questingConfig";
@@ -91,6 +127,15 @@ public interface DiscordNotificationsConfig extends Config {
 	default boolean sendQuestComplete() {
 		return false;
 	}
+
+	@ConfigItem(
+			keyName = "questMessage",
+			name = "Quest Message",
+			description = "Message to send to Discord on Quest",
+			section = questingConfig,
+			position = 1
+	)
+	default String questMessage() { return "$name has just completed: $quest"; }
 
 	@ConfigItem(
 			keyName = "sendQuestingScreenshot",
@@ -108,7 +153,7 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigSection(
 			name = "Deaths",
 			description = "The config for death notifications",
-			position = 2,
+			position = 3,
 			closedByDefault = true
 	)
 	String deathConfig = "deathConfig";
@@ -120,6 +165,15 @@ public interface DiscordNotificationsConfig extends Config {
 			section = deathConfig
 	)
 	default boolean sendDeath() { return false; }
+
+	@ConfigItem(
+			keyName = "deathMessage",
+			name = "Death Message",
+			description = "Message to send to Discord on Death",
+			section = deathConfig,
+			position = 1
+	)
+	default String deathMessage() { return "$name has just died!"; }
 
 	@ConfigItem(
 			keyName = "sendDeathScreenshot",
@@ -137,7 +191,7 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigSection(
 			name = "Clue Scrolls",
 			description = "The config for clue scroll notifications",
-			position = 3,
+			position = 4,
 			closedByDefault = true
 	)
 	String clueConfig = "clueConfig";
@@ -151,6 +205,15 @@ public interface DiscordNotificationsConfig extends Config {
 	default boolean sendClue() { return false; }
 
 	@ConfigItem(
+			keyName = "clueMessage",
+			name = "Clue Message",
+			description = "Message to send to Discord on Clue",
+			section = clueConfig,
+			position = 1
+	)
+	default String clueMessage() { return "$name has just completed a clue scroll!"; }
+
+	@ConfigItem(
 			keyName = "sendClueScreenshot",
 			name = "Include Clue screenshots",
 			description = "Include a screenshot with the discord notification when you complete a clue.",
@@ -162,18 +225,11 @@ public interface DiscordNotificationsConfig extends Config {
 	}
 	// End clue config section
 
-	@ConfigItem(
-			keyName = "webhook",
-			name = "Webhook URL",
-			description = "The Discord Webhook URL to send messages to."
-	)
-	String webhook();
-
 	// Pet config section
 	@ConfigSection(
 			name = "Pets",
 			description = "The config for pet notifications",
-			position = 4,
+			position = 5,
 			closedByDefault = true
 	)
 	String petConfig = "petConfig";
@@ -187,6 +243,15 @@ public interface DiscordNotificationsConfig extends Config {
 	default boolean setPets() { return false; }
 
 	@ConfigItem(
+			keyName = "petMessage",
+			name = "Pet Message",
+			description = "Message to send to Discord on Pet",
+			section = petConfig,
+			position = 1
+	)
+	default String petMessage() { return "$name has just received a pet!"; }
+
+	@ConfigItem(
 			keyName = "sendPetScreenshot",
 			name = "Include Pet screenshots",
 			description = "Include a screenshot with the discord notification when you receive a pet.",
@@ -196,4 +261,5 @@ public interface DiscordNotificationsConfig extends Config {
 	default boolean sendPetScreenshot() {
 		return false;
 	}
+
 }
