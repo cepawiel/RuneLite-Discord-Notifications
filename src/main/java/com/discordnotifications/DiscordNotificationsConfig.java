@@ -262,4 +262,41 @@ public interface DiscordNotificationsConfig extends Config {
 		return false;
 	}
 
+	// Collection Log config section
+	@ConfigSection(
+			name = "Collection Log",
+			description = "The config for collection log notifications",
+			position = 6,
+			closedByDefault = true
+	)
+	String collectionLogConfig = "collectionLogConfig";
+
+	@ConfigItem(
+			keyName = "includeCollectionLogs",
+			name = "Send Collection Log Notifications",
+			description = "Send messages when you receive a collection log entry.",
+			section = collectionLogConfig
+	)
+	default boolean setCollectionLogs() { return false; }
+
+	@ConfigItem(
+			keyName = "collectionLogMessage",
+			name = "Collection Log Message",
+			description = "Message to send to Discord on Pet",
+			section = collectionLogConfig,
+			position = 1
+	)
+	default String collectionLogMessage() { return "$name just received a new collection log item: $item!"; }
+
+	@ConfigItem(
+			keyName = "sendCollectionLogScreenshot",
+			name = "Include Collection Log screenshots",
+			description = "Include a screenshot with the discord notification when you receive a collection log item.",
+			section = collectionLogConfig,
+			position = 100
+	)
+	default boolean sendCollectionLogScreenshot() {
+		return false;
+	}
+
 }

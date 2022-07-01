@@ -14,6 +14,8 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.DrawManager;
 import static net.runelite.api.widgets.WidgetID.QUEST_COMPLETED_GROUP_ID;
+
+import net.runelite.client.util.Text;
 import okhttp3.*;
 
 import javax.imageio.ImageIO;
@@ -46,6 +48,8 @@ public class DiscordNotificationsPlugin extends Plugin
 	private static final ImmutableList<String> PET_MESSAGES = ImmutableList.of("You have a funny feeling like you're being followed",
 			"You feel something weird sneaking into your backpack",
 			"You have a funny feeling like you would have been followed");
+	private static final String COLLECTION_LOG_TEXT = "New item added to your collection log: ";
+	private static final Pattern VALUABLE_DROP_PATTERN = Pattern.compile(".*Valuable drop: ([^<>]+?\\(((?:\\d+,?)+) coins\\))(?:</col>)?");
 
 	@Inject
 	private Client client;
@@ -98,6 +102,7 @@ public class DiscordNotificationsPlugin extends Plugin
 	{
 
 		boolean didCompleteClue = client.getWidget(WidgetInfo.CLUE_SCROLL_REWARD_ITEM_CONTAINER) != null;
+
 
 		if (shouldSendClueMessage && didCompleteClue && config.sendClue()) {
 			shouldSendClueMessage = false;
@@ -179,6 +184,11 @@ public class DiscordNotificationsPlugin extends Plugin
 		if (config.setPets() && PET_MESSAGES.stream().anyMatch(chatMessage::contains))
 		{
 			sendPetMessage();
+		}
+		if (config.setCollectionLogs() && chatMessage.startsWith(COLLECTION_LOG_TEXT) && client.getVarbitValue(Varbits.COLLECTION_LOG_NOTIFICATION) == 1)
+		{
+			String entry = Text.removeTags(chatMessage).substring(COLLECTION_LOG_TEXT.length());
+			sendCollectionLogMessage(entry);
 		}
 	}
 
@@ -289,6 +299,19 @@ public class DiscordNotificationsPlugin extends Plugin
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(petMessageString);
 		sendWebhook(discordWebhookBody, config.sendPetScreenshot());
+	}
+
+	private void sendCollectionLogMessage(String itemName)
+	{
+		String localName = client.getLocalPlayer().getName();
+
+		String collectionLogMessageString = config.collectionLogMessage()
+				.replaceAll("\\$name", localName)
+				.replaceAll("\\$item", itemName);
+
+		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
+		discordWebhookBody.setContent(collectionLogMessageString);
+		sendWebhook(discordWebhookBody, config.sendCollectionLogScreenshot());
 	}
 
 	private void sendWebhook(DiscordWebhookBody discordWebhookBody, boolean sendScreenshot)
