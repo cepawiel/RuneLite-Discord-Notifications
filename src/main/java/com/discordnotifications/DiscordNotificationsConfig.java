@@ -282,7 +282,7 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigItem(
 			keyName = "collectionLogMessage",
 			name = "Collection Log Message",
-			description = "Message to send to Discord on Pet",
+			description = "Message to send to Discord on Collection Log",
 			section = collectionLogConfig,
 			position = 1
 	)
@@ -299,4 +299,49 @@ public interface DiscordNotificationsConfig extends Config {
 		return false;
 	}
 
+	// Valuable Drop config section
+	@ConfigSection(
+			name = "Valuable Drop",
+			description = "The config for valuable drop notifications",
+			position = 7,
+			closedByDefault = true
+	)
+	String valuableDropConfig = "valuableDropConfig";
+
+	@ConfigItem(
+			keyName = "setValuableDrop",
+			name = "Send Valuable Drops Notifications",
+			description = "Send messages when you receive a valuable drops entry.",
+			section = valuableDropConfig
+	)
+	default boolean setValuableDrop() { return false; }
+
+	@ConfigItem(
+			keyName = "valuableDropThreshold",
+			name = "Valuable Drop Threshold",
+			description = "The minimum value of drop for it to send a discord message.",
+			position = 1,
+			section = valuableDropConfig
+	)
+	default int valuableDropThreshold() { return 0; }
+
+	@ConfigItem(
+			keyName = "valuableDropMessage",
+			name = "Valuable Drop Message",
+			description = "Message to send to Discord for Valuable Drops",
+			section = valuableDropConfig,
+			position = 2
+	)
+	default String valuableDropMessage() { return "$name just received a valuable drop: $item! \nApprox Value: $itemValue coins"; }
+
+	@ConfigItem(
+			keyName = "sendValuableDropScreenshot",
+			name = "Include Valuable Drop screenshots",
+			description = "Include a screenshot with the discord notification when you receive a valuable drop",
+			section = valuableDropConfig,
+			position = 100
+	)
+	default boolean sendValuableDropScreenshot() {
+		return false;
+	}
 }

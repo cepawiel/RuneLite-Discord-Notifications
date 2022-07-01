@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
@@ -190,6 +191,21 @@ public class DiscordNotificationsPlugin extends Plugin
 			String entry = Text.removeTags(chatMessage).substring(COLLECTION_LOG_TEXT.length());
 			sendCollectionLogMessage(entry);
 		}
+		if (config.setValuableDrop())
+		{
+			Matcher matcher = VALUABLE_DROP_PATTERN.matcher(chatMessage);
+			if (matcher.matches())
+			{
+				int valuableDropValue = Integer.parseInt(matcher.group(2).replaceAll(",", ""));
+				if (valuableDropValue >= config.valuableDropThreshold())
+				{
+					String[] valuableDrop = matcher.group(1).split(" \\(");
+					String valuableDropName = (String) Array.get(valuableDrop, 0);
+					String valuableDropValueString = matcher.group(2);
+					sendValuableDropMessage(valuableDropName, valuableDropValueString);
+				}
+			}
+		}
 	}
 
 	@Subscribe
@@ -312,6 +328,20 @@ public class DiscordNotificationsPlugin extends Plugin
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(collectionLogMessageString);
 		sendWebhook(discordWebhookBody, config.sendCollectionLogScreenshot());
+	}
+
+	private void sendValuableDropMessage(String itemName, String itemValue)
+	{
+		String localName = client.getLocalPlayer().getName();
+
+		String valuableDropMessageString = config.collectionLogMessage()
+				.replaceAll("\\$name", localName)
+				.replaceAll("\\$item", itemName)
+				.replaceAll("\\$itemValue", itemValue);
+
+		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
+		discordWebhookBody.setContent(valuableDropMessageString);
+		sendWebhook(discordWebhookBody, config.sendValuableDropScreenshot());
 	}
 
 	private void sendWebhook(DiscordWebhookBody discordWebhookBody, boolean sendScreenshot)
