@@ -1,4 +1,4 @@
-package com.discordnotifications;
+package com.enhanceddiscordnotifications;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -14,6 +14,8 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.DrawManager;
 import static net.runelite.api.widgets.WidgetID.QUEST_COMPLETED_GROUP_ID;
+
+import net.runelite.client.util.Text;
 import okhttp3.*;
 
 import javax.imageio.ImageIO;
@@ -21,6 +23,7 @@ import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
@@ -29,8 +32,8 @@ import java.util.regex.Pattern;
 import static net.runelite.http.api.RuneLiteAPI.GSON;
 
 @Slf4j
-@PluginDescriptor(name = "Discord Notifications")
-public class DiscordNotificationsPlugin extends Plugin
+@PluginDescriptor(name = "Enhanced Discord Notifications")
+public class EnhancedDiscordNotificationsPlugin extends Plugin
 {
 	private Hashtable<String, Integer> currentLevels;
 	private ArrayList<String> leveledSkills;
@@ -39,6 +42,8 @@ public class DiscordNotificationsPlugin extends Plugin
 	private boolean shouldSendClueMessage = false;
 	private int ticksWaited = 0;
 
+	private static final String COLLECTION_LOG_TEXT = "New item added to your collection log: ";
+	private static final Pattern VALUABLE_DROP_PATTERN = Pattern.compile(".*Valuable drop: ([^<>]+?\\(((?:\\d+,?)+) coins\\))(?:</col>)?");
 	private static final Pattern QUEST_PATTERN_1 = Pattern.compile(".+?ve\\.*? (?<verb>been|rebuilt|.+?ed)? ?(?:the )?'?(?<quest>.+?)'?(?: [Qq]uest)?[!.]?$");
 	private static final Pattern QUEST_PATTERN_2 = Pattern.compile("'?(?<quest>.+?)'?(?: [Qq]uest)? (?<verb>[a-z]\\w+?ed)?(?: f.*?)?[!.]?$");
 	private static final ImmutableList<String> RFD_TAGS = ImmutableList.of("Another Cook", "freed", "defeated", "saved");
@@ -46,12 +51,13 @@ public class DiscordNotificationsPlugin extends Plugin
 	private static final ImmutableList<String> PET_MESSAGES = ImmutableList.of("You have a funny feeling like you're being followed",
 			"You feel something weird sneaking into your backpack",
 			"You have a funny feeling like you would have been followed");
+	private boolean notificationStarted;
 
 	@Inject
 	private Client client;
 
 	@Inject
-	private DiscordNotificationsConfig config;
+	private EnhancedDiscordNotificationsConfig config;
 
 	@Inject
 	private OkHttpClient okHttpClient;
@@ -60,9 +66,9 @@ public class DiscordNotificationsPlugin extends Plugin
 	private DrawManager drawManager;
 
 	@Provides
-	DiscordNotificationsConfig provideConfig(ConfigManager configManager)
+	EnhancedDiscordNotificationsConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(DiscordNotificationsConfig.class);
+		return configManager.getConfig(EnhancedDiscordNotificationsConfig.class);
 	}
 
 	@Override
@@ -75,7 +81,7 @@ public class DiscordNotificationsPlugin extends Plugin
 	@Override
 	protected void shutDown() throws Exception
 	{
-
+		notificationStarted = false;
 	}
 
 	@Subscribe
@@ -98,6 +104,7 @@ public class DiscordNotificationsPlugin extends Plugin
 	{
 
 		boolean didCompleteClue = client.getWidget(WidgetInfo.CLUE_SCROLL_REWARD_ITEM_CONTAINER) != null;
+
 
 		if (shouldSendClueMessage && didCompleteClue && config.sendClue()) {
 			shouldSendClueMessage = false;
@@ -180,12 +187,58 @@ public class DiscordNotificationsPlugin extends Plugin
 		{
 			sendPetMessage();
 		}
+		if (config.setCollectionLogs() && chatMessage.startsWith(COLLECTION_LOG_TEXT) && client.getVarbitValue(Varbits.COLLECTION_LOG_NOTIFICATION) == 1)
+		{
+			String itemName = Text.removeTags(chatMessage).substring(COLLECTION_LOG_TEXT.length());
+			sendCollectionLogMessage(itemName);
+		}
+
+		if (config.setValuableDrop())
+		{
+			Matcher matcher = VALUABLE_DROP_PATTERN.matcher(chatMessage);
+			if (matcher.matches())
+			{
+				int valuableDropValue = Integer.parseInt(matcher.group(2).replaceAll(",", ""));
+				if (valuableDropValue >= config.valuableDropThreshold())
+				{
+					String[] valuableDrop = matcher.group(1).split(" \\(");
+					String valuableDropName = (String) Array.get(valuableDrop, 0);
+					String valuableDropValueString = matcher.group(2);
+					sendValuableDropMessage(valuableDropName, valuableDropValueString);
+				}
+			}
+		}
+	}
+
+	@Subscribe
+	public void onScriptPreFired(ScriptPreFired scriptPreFired)
+	{
+		switch (scriptPreFired.getScriptId())
+		{
+			case ScriptID.NOTIFICATION_START:
+				notificationStarted = true;
+				break;
+			case ScriptID.NOTIFICATION_DELAY:
+				if (!notificationStarted)
+				{
+					return;
+				}
+				String notificationTopText = client.getVarcStrValue(VarClientStr.NOTIFICATION_TOP_TEXT);
+				String notificationBottomText = client.getVarcStrValue(VarClientStr.NOTIFICATION_BOTTOM_TEXT);
+				if (notificationTopText.equalsIgnoreCase("Collection log") && config.setCollectionLogs())
+				{
+					String itemName = "**" + Text.removeTags(notificationBottomText).substring("New item:".length()) + "**";
+					sendCollectionLogMessage(itemName);
+				}
+				notificationStarted = false;
+				break;
+		}
 	}
 
 	@Subscribe
 	public void onActorDeath(ActorDeath actorDeath)
 	{
-		if (config.sendDeath() == false) {
+		if (!config.sendDeath()) {
 			return;
 		}
 
@@ -220,7 +273,7 @@ public class DiscordNotificationsPlugin extends Plugin
 
 	private void sendQuestMessage(String questName)
 	{
-		String localName = client.getLocalPlayer().getName();
+		String localName = "**" + client.getLocalPlayer().getName() + "**";
 
 		String questMessageString = config.questMessage().replaceAll("\\$name", localName)
 														 .replaceAll("\\$quest", questName);
@@ -232,7 +285,7 @@ public class DiscordNotificationsPlugin extends Plugin
 
 	private void sendDeathMessage()
 	{
-		String localName = client.getLocalPlayer().getName();
+		String localName = "**" + client.getLocalPlayer().getName() + "**";
 
 		String deathMessageString = config.deathMessage().replaceAll("\\$name", localName);
 
@@ -243,7 +296,7 @@ public class DiscordNotificationsPlugin extends Plugin
 
 	private void sendClueMessage()
 	{
-		String localName = client.getLocalPlayer().getName();
+		String localName = "**" + client.getLocalPlayer().getName() + "**";
 
 		String clueMessage = config.clueMessage().replaceAll("\\$name", localName);
 
@@ -254,7 +307,7 @@ public class DiscordNotificationsPlugin extends Plugin
 
 	private void sendLevelMessage()
 	{
-		String localName = client.getLocalPlayer().getName();
+		String localName = "**" + client.getLocalPlayer().getName() + "**";
 
 		String levelUpString = config.levelMessage().replaceAll("\\$name", localName);
 
@@ -282,13 +335,40 @@ public class DiscordNotificationsPlugin extends Plugin
 
 	private void sendPetMessage()
 	{
-		String localName = client.getLocalPlayer().getName();
+		String localName = "**" + client.getLocalPlayer().getName() + "**";
 
 		String petMessageString = config.petMessage().replaceAll("\\$name", localName);
 
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(petMessageString);
 		sendWebhook(discordWebhookBody, config.sendPetScreenshot());
+	}
+
+	private void sendCollectionLogMessage(String itemName)
+	{
+		String localName = "**" + client.getLocalPlayer().getName() + "**";
+
+		String collectionLogMessageString = config.collectionLogMessage()
+				.replaceAll("\\$name", localName)
+				.replaceAll("\\$itemName", itemName);
+
+		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
+		discordWebhookBody.setContent(collectionLogMessageString);
+		sendWebhook(discordWebhookBody, config.sendCollectionLogScreenshot());
+	}
+
+	private void sendValuableDropMessage(String itemName, String itemValue)
+	{
+		String localName = "**" + client.getLocalPlayer().getName() + "**";
+
+		String valuableDropMessageString = config.valuableDropMessage()
+				.replaceAll("\\$name", localName)
+				.replaceAll("\\$itemName", itemName)
+				.replaceAll("\\$itemValue", itemValue);
+
+		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
+		discordWebhookBody.setContent(valuableDropMessageString);
+		sendWebhook(discordWebhookBody, config.sendValuableDropScreenshot());
 	}
 
 	private void sendWebhook(DiscordWebhookBody discordWebhookBody, boolean sendScreenshot)

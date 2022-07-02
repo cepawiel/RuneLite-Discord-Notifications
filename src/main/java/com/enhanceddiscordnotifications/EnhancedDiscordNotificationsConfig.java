@@ -1,12 +1,12 @@
-package com.discordnotifications;
+package com.enhanceddiscordnotifications;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
-@ConfigGroup("discordnotifications")
-public interface DiscordNotificationsConfig extends Config {
+@ConfigGroup("enhanceddiscordnotifications")
+public interface EnhancedDiscordNotificationsConfig extends Config {
 
 	// Webhook config section
 	@ConfigSection(
@@ -262,4 +262,86 @@ public interface DiscordNotificationsConfig extends Config {
 		return false;
 	}
 
+	// Collection Log config section
+	@ConfigSection(
+			name = "Collection Log",
+			description = "The config for collection log notifications",
+			position = 6,
+			closedByDefault = true
+	)
+	String collectionLogConfig = "collectionLogConfig";
+
+	@ConfigItem(
+			keyName = "includeCollectionLogs",
+			name = "Send Collection Log Notifications",
+			description = "Send messages when you receive a collection log entry.",
+			section = collectionLogConfig
+	)
+	default boolean setCollectionLogs() { return false; }
+
+	@ConfigItem(
+			keyName = "collectionLogMessage",
+			name = "Collection Log Message",
+			description = "Message to send to Discord on Collection Log",
+			section = collectionLogConfig,
+			position = 1
+	)
+	default String collectionLogMessage() { return "$name just received a new collection log item: **$itemName!**"; }
+
+	@ConfigItem(
+			keyName = "sendCollectionLogScreenshot",
+			name = "Include Collection Log screenshots",
+			description = "Include a screenshot with the discord notification when you receive a collection log item.",
+			section = collectionLogConfig,
+			position = 100
+	)
+	default boolean sendCollectionLogScreenshot() {
+		return false;
+	}
+
+	// Valuable Drop config section
+	@ConfigSection(
+			name = "Valuable Drop",
+			description = "The config for valuable drop notifications",
+			position = 7,
+			closedByDefault = true
+	)
+	String valuableDropConfig = "valuableDropConfig";
+
+	@ConfigItem(
+			keyName = "setValuableDrop",
+			name = "Send Valuable Drops Notifications",
+			description = "Send messages when you receive a valuable drops entry.",
+			section = valuableDropConfig
+	)
+	default boolean setValuableDrop() { return false; }
+
+	@ConfigItem(
+			keyName = "valuableDropThreshold",
+			name = "Valuable Drop Threshold",
+			description = "The minimum value of drop for it to send a discord message.",
+			position = 1,
+			section = valuableDropConfig
+	)
+	default int valuableDropThreshold() { return 0; }
+
+	@ConfigItem(
+			keyName = "valuableDropMessage",
+			name = "Valuable Drop Message",
+			description = "Message to send to Discord for Valuable Drops",
+			section = valuableDropConfig,
+			position = 2
+	)
+	default String valuableDropMessage() { return "$name just received a valuable drop: $itemName! \nApprox Value: **$itemValue coins**"; }
+
+	@ConfigItem(
+			keyName = "sendValuableDropScreenshot",
+			name = "Include Valuable Drop screenshots",
+			description = "Include a screenshot with the discord notification when you receive a valuable drop",
+			section = valuableDropConfig,
+			position = 100
+	)
+	default boolean sendValuableDropScreenshot() {
+		return false;
+	}
 }
