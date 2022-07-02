@@ -1,13 +1,13 @@
-package com.discordnotifications;
+package com.enhanceddiscordnotifications;
 
 import net.runelite.client.RuneLite;
 import net.runelite.client.externalplugins.ExternalPluginManager;
 
-public class DiscordNotificationsTest
+public class EnhancedDiscordNotificationsTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(DiscordNotificationsPlugin.class);
+		ExternalPluginManager.loadBuiltin(EnhancedDiscordNotificationsPlugin.class);
 		RuneLite.main(args);
 	}
 }

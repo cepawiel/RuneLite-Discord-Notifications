@@ -1,4 +1,4 @@
-package com.discordnotifications;
+package com.enhanceddiscordnotifications;
 
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
@@ -6,7 +6,7 @@ import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
 @ConfigGroup("discordnotifications")
-public interface DiscordNotificationsConfig extends Config {
+public interface EnhancedDiscordNotificationsConfig extends Config {
 
 	// Webhook config section
 	@ConfigSection(
@@ -286,7 +286,7 @@ public interface DiscordNotificationsConfig extends Config {
 			section = collectionLogConfig,
 			position = 1
 	)
-	default String collectionLogMessage() { return "$name just received a new collection log item: $item!"; }
+	default String collectionLogMessage() { return "$name just received a new collection log item: **$itemName!**"; }
 
 	@ConfigItem(
 			keyName = "sendCollectionLogScreenshot",
@@ -332,7 +332,7 @@ public interface DiscordNotificationsConfig extends Config {
 			section = valuableDropConfig,
 			position = 2
 	)
-	default String valuableDropMessage() { return "$name just received a valuable drop: $item! \nApprox Value: $itemValue coins"; }
+	default String valuableDropMessage() { return "$name just received a valuable drop: $itemName! \nApprox Value: **$itemValue coins**"; }
 
 	@ConfigItem(
 			keyName = "sendValuableDropScreenshot",
