@@ -5,7 +5,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
-@ConfigGroup("discordnotifications")
+@ConfigGroup("enhanceddiscordnotifications")
 public interface EnhancedDiscordNotificationsConfig extends Config {
 
 	// Webhook config section
