@@ -51,8 +51,6 @@ public class EnhancedDiscordNotificationsPlugin extends Plugin
 	private static final ImmutableList<String> PET_MESSAGES = ImmutableList.of("You have a funny feeling like you're being followed",
 			"You feel something weird sneaking into your backpack",
 			"You have a funny feeling like you would have been followed");
-
-	private boolean shouldSendMessage;
 	private boolean notificationStarted;
 
 	@Inject
@@ -98,8 +96,6 @@ public class EnhancedDiscordNotificationsPlugin extends Plugin
 		if (gameStateChanged.getGameState().equals(GameState.LOGIN_SCREEN))
 		{
 			resetState();
-		} else {
-			shouldSendMessage = true;
 		}
 	}
 
@@ -196,6 +192,7 @@ public class EnhancedDiscordNotificationsPlugin extends Plugin
 			String itemName = Text.removeTags(chatMessage).substring(COLLECTION_LOG_TEXT.length());
 			sendCollectionLogMessage(itemName);
 		}
+
 		if (config.setValuableDrop())
 		{
 			Matcher matcher = VALUABLE_DROP_PATTERN.matcher(chatMessage);
