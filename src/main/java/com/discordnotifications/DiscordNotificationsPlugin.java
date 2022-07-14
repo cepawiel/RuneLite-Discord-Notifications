@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static net.runelite.http.api.RuneLiteAPI.GSON;
 
@@ -296,18 +299,27 @@ public class DiscordNotificationsPlugin extends Plugin
 		String configUrl = config.webhook();
 		if (Strings.isNullOrEmpty(configUrl)) { return; }
 
-		HttpUrl url = HttpUrl.parse(configUrl);
-		MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
-				.setType(MultipartBody.FORM)
-				.addFormDataPart("payload_json", GSON.toJson(discordWebhookBody));
+		List<String> webhookUrls = Arrays.asList(configUrl.split("\n"))
+				.stream()
+				.filter(u -> u.length() > 0)
+				.map(u -> u.trim())
+				.collect(Collectors.toList());
 
-		if (sendScreenshot)
+		for (String webhookUrl : webhookUrls)
 		{
-			sendWebhookWithScreenshot(url, requestBodyBuilder);
-		}
-		else
-		{
-			buildRequestAndSend(url, requestBodyBuilder);
+			HttpUrl url = HttpUrl.parse(webhookUrl);
+			MultipartBody.Builder requestBodyBuilder = new MultipartBody.Builder()
+					.setType(MultipartBody.FORM)
+					.addFormDataPart("payload_json", GSON.toJson(discordWebhookBody));
+
+			if (sendScreenshot)
+			{
+				sendWebhookWithScreenshot(url, requestBodyBuilder);
+			}
+			else
+			{
+				buildRequestAndSend(url, requestBodyBuilder);
+			}
 		}
 	}
 
