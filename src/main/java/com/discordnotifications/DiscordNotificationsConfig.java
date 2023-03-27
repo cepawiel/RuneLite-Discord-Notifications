@@ -98,6 +98,24 @@ public interface DiscordNotificationsConfig extends Config {
 	default String andLevelMessage() { return ", and $skill to $level"; }
 
 	@ConfigItem(
+			keyName = "includeTotalLevelMessage",
+			name = "Include total level with message",
+			description = "Include total level in the message to send to Discord.",
+			section = levellingConfig,
+			position = 7
+	)
+	default boolean sendTotalLevel() { return false; }
+
+	@ConfigItem(
+			keyName = "totalLevelMessage",
+			name = "Total Level Message",
+			description = "Message to send to Discord when Total Level is included.",
+			section = levellingConfig,
+			position = 8
+	)
+	default String totalLevelMessage() { return " - Total Level: $total"; }
+
+	@ConfigItem(
 			keyName = "sendLevellingScreenshot",
 			name = "Include levelling screenshots",
 			description = "Include a screenshot when leveling up.",

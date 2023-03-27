@@ -270,10 +270,15 @@ public class DiscordNotificationsPlugin extends Plugin
 			if(i != 0) {
 				levelUpString += config.andLevelMessage();
 			}
+			
+			if(config.sendTotalLevel()) {
+				levelUpString += config.totalLevelMessage();
+			}
 
 			String fixed = levelUpString
 					.replaceAll("\\$skill", skills[i])
-					.replaceAll("\\$level", currentLevels.get(skills[i]).toString());
+					.replaceAll("\\$level", currentLevels.get(skills[i]).toString())
+					.replaceAll("\\$total" , Integer.toString(client.getTotalLevel()));
 
 			levelUpString = fixed;
 		}
