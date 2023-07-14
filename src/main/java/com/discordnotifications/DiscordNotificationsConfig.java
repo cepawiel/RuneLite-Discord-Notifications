@@ -42,7 +42,7 @@ public interface DiscordNotificationsConfig extends Config {
 			section = levellingConfig,
 			position = 1
 	)
-	default boolean sendLevelling() {
+	default boolean includeLevelling() {
 		return false;
 	}
 
@@ -104,7 +104,7 @@ public interface DiscordNotificationsConfig extends Config {
 			section = levellingConfig,
 			position = 7
 	)
-	default boolean sendTotalLevel() { return false; }
+	default boolean includeTotalLevel() { return false; }
 
 	@ConfigItem(
 			keyName = "totalLevelMessage",
@@ -142,7 +142,7 @@ public interface DiscordNotificationsConfig extends Config {
 			description = "Send messages when you complete a quest.",
 			section = questingConfig
 	)
-	default boolean sendQuestComplete() {
+	default boolean includeQuestComplete() {
 		return false;
 	}
 
@@ -158,7 +158,7 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigItem(
 			keyName = "sendQuestingScreenshot",
 			name = "Include quest screenshots",
-			description = "Include a screenshot with the discord notification when leveling up.",
+			description = "Include a screenshot with the Discord notification when leveling up.",
 			section = questingConfig,
 			position = 100
 	)
@@ -179,10 +179,10 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigItem(
 			keyName = "includeDeaths",
 			name = "Send Death Notifications",
-			description = "Send messages when you die to discord.",
+			description = "Send messages when you die to Discord.",
 			section = deathConfig
 	)
-	default boolean sendDeath() { return false; }
+	default boolean includeDeaths() { return false; }
 
 	@ConfigItem(
 			keyName = "deathMessage",
@@ -196,7 +196,7 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigItem(
 			keyName = "sendDeathScreenshot",
 			name = "Include death screenshots",
-			description = "Include a screenshot with the discord notification when you die.",
+			description = "Include a screenshot with the Discord notification when you die.",
 			section = deathConfig,
 			position = 100
 	)
@@ -220,7 +220,7 @@ public interface DiscordNotificationsConfig extends Config {
 			description = "Send messages when you complete a clue scroll.",
 			section = clueConfig
 	)
-	default boolean sendClue() { return false; }
+	default boolean includeClues() { return false; }
 
 	@ConfigItem(
 			keyName = "clueMessage",
@@ -234,7 +234,7 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigItem(
 			keyName = "sendClueScreenshot",
 			name = "Include Clue screenshots",
-			description = "Include a screenshot with the discord notification when you complete a clue.",
+			description = "Include a screenshot with the Discord notification when you complete a clue.",
 			section = clueConfig,
 			position = 100
 	)
@@ -258,7 +258,7 @@ public interface DiscordNotificationsConfig extends Config {
 			description = "Send messages when you receive a pet.",
 			section = petConfig
 	)
-	default boolean setPets() { return false; }
+	default boolean includePets() { return false; }
 
 	@ConfigItem(
 			keyName = "petMessage",
@@ -272,7 +272,7 @@ public interface DiscordNotificationsConfig extends Config {
 	@ConfigItem(
 			keyName = "sendPetScreenshot",
 			name = "Include Pet screenshots",
-			description = "Include a screenshot with the discord notification when you receive a pet.",
+			description = "Include a screenshot with the Discord notification when you receive a pet.",
 			section = petConfig,
 			position = 100
 	)
@@ -280,4 +280,77 @@ public interface DiscordNotificationsConfig extends Config {
 		return false;
 	}
 
+	@ConfigSection(
+		name = "Collection logs",
+		description = "The config for collection logs",
+		position = 6,
+		closedByDefault = true
+	)
+	String collectionLogsConfig = "collectionLogsConfig";
+
+	@ConfigItem(
+		keyName = "includeCollectionLogs",
+		name = "Collection Log Notifications",
+		description = "Message to send to Discord on collection logs completions",
+		section = collectionLogsConfig,
+		position = 1
+	)
+	default boolean includeCollectionLogs() { return false; }
+
+	@ConfigItem(
+		keyName = "collectionLogMessage",
+		name = "Collection log Message",
+		description = "Message to send to Discord on collection logs completions",
+		section = collectionLogsConfig,
+		position = 2
+	)
+	default String collectionLogMessage() { return "$name has just completed a collection log: $entry"; }
+
+	@ConfigItem(
+		keyName = "sendCollectionLogScreenshot",
+		name = "Include collection log screenshots",
+		description = "Include a screenshot with the Discord notification when you fill a new collection log slot",
+		section = collectionLogsConfig,
+		position = 3
+	)
+	default boolean sendCollectionLogScreenshot() {
+		return false;
+	}
+
+	@ConfigSection(
+		name = "Combat Achievements",
+		description = "The config for combat achievements",
+		position = 6,
+		closedByDefault = true
+	)
+	String combatAchievementsConfig = "combatAchievementsConfig";
+
+	@ConfigItem(
+		keyName = "includeCombatAchievements",
+		name = "Combat Achievements Notifications",
+		description = "Message to send to Discord on combat achievements completions",
+		section = combatAchievementsConfig,
+		position = 1
+	)
+	default boolean includeCombatAchievements() { return false; }
+
+	@ConfigItem(
+		keyName = "combatAchievementsMessage",
+		name = "Combat Achievement Message",
+		description = "Message to send to Discord on combat achievements completions",
+		section = combatAchievementsConfig,
+		position = 2
+	)
+	default String combatAchievementsMessage() { return "$name has just completed a combat achievement: $achievement"; }
+
+	@ConfigItem(
+		keyName = "sendCombatAchievementScreenshot",
+		name = "Include combat achievements screenshots",
+		description = "Include a screenshot with the Discord notification when you complete a combat achievement",
+		section = combatAchievementsConfig,
+		position = 100
+	)
+	default boolean sendCombatAchievementsScreenshot() {
+		return false;
+	}
 }
