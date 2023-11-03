@@ -249,8 +249,7 @@ public class DiscordNotificationsPlugin extends Plugin
 				String bottomText = client.getVarcStrValue(VarClientStr.NOTIFICATION_BOTTOM_TEXT);
 
 				if (topText.equalsIgnoreCase("Collection log")
-						&& config.includeCollectionLogs()
-						&& config.sendCollectionLogScreenshot())
+						&& config.includeCollectionLogs())
 				{
 					String entry = Text.removeTags(bottomText).substring("New item:".length());
 					sendCollectionLogMessage(entry);
@@ -258,7 +257,6 @@ public class DiscordNotificationsPlugin extends Plugin
 
 				if (topText.equalsIgnoreCase("Combat Task Completed!")
 						&& config.includeCombatAchievements()
-						&& config.sendCombatAchievementsScreenshot()
 						&& client.getVarbitValue(Varbits.COMBAT_ACHIEVEMENTS_POPUP) == 0)
 				{
 					String[] s = bottomText.split("<.*?>");
