@@ -24,11 +24,13 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static net.runelite.http.api.RuneLiteAPI.GSON;
@@ -79,6 +81,18 @@ public class DiscordNotificationsPlugin extends Plugin
 
 	@Inject
 	private DrawManager drawManager;
+
+	private static Map<String, String> caTierMap;
+
+	static {
+		caTierMap = new HashMap<>();
+		caTierMap.put("1", "an easy");
+		caTierMap.put("2", "a medium");
+		caTierMap.put("3", "a hard");
+		caTierMap.put("4", "an elite");
+		caTierMap.put("5", "a master");
+		caTierMap.put("6", "a grandmaster");
+	}
 
 	@Provides
 	DiscordNotificationsConfig provideConfig(ConfigManager configManager)
@@ -263,7 +277,9 @@ public class DiscordNotificationsPlugin extends Plugin
 				{
 					String[] s = bottomText.split("<.*?>");
 					String task = s[1].replaceAll("[:?]", "");
-					sendCombatAchievementMessage(task);
+					String tier = caTierMap.get(s[2].stripLeading().split("")[1]);
+
+					sendCombatAchievementMessage(task, tier);
 				}
 
 				notificationStarted = false;
@@ -300,13 +316,14 @@ public class DiscordNotificationsPlugin extends Plugin
 		sendWebhook(discordWebhookBody, config.sendQuestingScreenshot());
 	}
 
-	private void sendCombatAchievementMessage(String task) {
+	private void sendCombatAchievementMessage(String task, String tier) {
 		String localName = client.getLocalPlayer().getName();
 
 		String combatAchievementMessageString =
 			config.combatAchievementsMessage()
-				  .replaceAll("\\$name", localName)
-				  .replaceAll("\\$achievement", task);
+					.replaceAll("\\$name", localName)
+					.replaceAll("\\$tier", tier)
+					.replaceAll("\\$achievement", task);
 
 		DiscordWebhookBody discordWebhookBody = new DiscordWebhookBody();
 		discordWebhookBody.setContent(combatAchievementMessageString);

@@ -341,7 +341,7 @@ public interface DiscordNotificationsConfig extends Config {
 		section = combatAchievementsConfig,
 		position = 2
 	)
-	default String combatAchievementsMessage() { return "$name has just completed a combat achievement: $achievement"; }
+	default String combatAchievementsMessage() { return "$name has just completed $tier combat achievement: $achievement"; }
 
 	@ConfigItem(
 		keyName = "sendCombatAchievementScreenshot",
